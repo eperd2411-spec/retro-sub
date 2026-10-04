@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RETRO SUB // YouTube Caption Extractor</title>
+<style>
+:root{--bg:#070807;--panel:#0d110d;--line:#4f5b45;--gold:#d7b15a;--gold2:#ffe49a;--green:#8cff72;--muted:#8b9683;--red:#ff6b61}
+*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 50% 0,#1a1c12 0,#080908 48%,#030403 100%);color:#d9dfd1;font:14px/1.5 "Courier New",monospace;min-height:100%}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px);opacity:.25;z-index:20}
+.wrap{max-width:1050px;margin:auto;padding:24px 16px 60px}.top{border:1px solid var(--line);background:rgba(8,12,8,.92);box-shadow:0 0 30px #000;padding:18px}.brand{font-size:25px;color:var(--gold2);letter-spacing:2px;text-shadow:0 0 10px #a67d24}.sub{color:var(--muted);margin-top:3px}.terminal{margin-top:18px}.row{display:flex;gap:9px;flex-wrap:wrap}.input{flex:1;min-width:250px;background:#050705;border:1px solid #626e57;color:#f2f4ec;padding:13px;font:inherit;outline:none}.input:focus{border-color:var(--gold);box-shadow:0 0 12px #8f6c2533}.btn{background:#15190f;border:1px solid #75602f;color:var(--gold2);padding:12px 15px;font:inherit;cursor:pointer}.btn:hover{background:#232616;box-shadow:0 0 12px #a07a2d44}.btn.green{color:var(--green);border-color:#4e7542}.btn.red{color:var(--red);border-color:#74433f}.panel{margin-top:14px;border:1px solid var(--line);background:rgba(10,14,10,.93);padding:15px}.panel h2{font-size:14px;color:var(--gold);margin:0 0 12px}.status{white-space:pre-wrap;color:var(--muted);min-height:22px}.err{color:var(--red)}.ok{color:var(--green)}.video{display:grid;grid-template-columns:180px 1fr;gap:15px}.thumb{width:180px;aspect-ratio:16/9;object-fit:cover;border:1px solid #50584a;background:#050505}.title{font-size:17px;color:#fff}.meta{color:var(--muted);margin-top:5px}.tracks{display:flex;gap:7px;flex-wrap:wrap}.track{cursor:pointer;border:1px solid #465040;background:#0a0d0a;color:#c9d0c1;padding:8px 10px;font:inherit}.track.active{border-color:var(--gold);color:var(--gold2);box-shadow:0 0 9px #9c772d33}.track small{color:#78816f}.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.select{background:#070907;color:#dfe5d8;border:1px solid #56604c;padding:10px;font:inherit}.viewer{margin-top:12px;border:1px solid #343b31;max-height:500px;overflow:auto;background:#050605}.line{display:grid;grid-template-columns:85px 1fr;gap:10px;padding:8px 10px;border-bottom:1px dotted #22291f}.line:hover{background:#11160f}.time{color:var(--gold);cursor:pointer}.caption{white-space:pre-wrap}.search{background:#070907;color:#e7eadf;border:1px solid #50594b;padding:9px;font:inherit;width:100%}.downloads{display:flex;gap:8px;flex-wrap:wrap}.hint{color:#98a18f;font-size:12px}.browserbox{border:1px dashed #7a6433;background:#11140d;padding:13px}.browserbox strong{color:var(--gold2)}.bookmark{display:inline-block;color:#070807;background:var(--gold);padding:7px 10px;text-decoration:none;font-weight:bold;cursor:grab;margin-top:8px}.steps{margin:8px 0 0 20px;padding:0}.steps li{margin:4px 0}.hide{display:none!important}@media(max-width:650px){.video{grid-template-columns:1fr}.thumb{width:100%;max-width:360px}.line{grid-template-columns:65px 1fr}.brand{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <div class="brand">[ RETRO SUB // V3.0 ]</div>
+  <div class="sub">YouTube Caption Extractor // Browser Assist + Server Fallback</div>
+  <div class="terminal">
+    <div class="row">
+      <input id="url" class="input" placeholder="Paste YouTube URL..." autocomplete="off">
+      <button id="scan" class="btn">SCAN CAPTIONS</button>
+    </div>
+    <div id="status" class="status">READY_</div>
+  </div>
+</div>
+
+<div id="browserPanel" class="panel">
+  <h2>[ BROWSER ASSIST — RECOMMENDED ]</h2>
+  <div class="browserbox">
+    <strong>Server YouTube bisa diblokir anti-bot.</strong> Mode ini membaca caption dari halaman YouTube yang sedang kamu buka, lalu mengirim hanya teks/timestamp caption ke RETRO SUB. Tidak perlu memasukkan password atau cookie ke server.
+    <ol class="steps">
+      <li>Tambahkan bookmark di bawah ke bookmark bar browser (drag link ke bookmark bar).</li>
+      <li>Buka video YouTube yang ingin diambil caption-nya.</li>
+      <li>Klik bookmark <b>RETRO SUB EXTRACT</b>.</li>
+      <li>Pilih bahasa caption. Hasil otomatis masuk ke jendela RETRO SUB.</li>
+    </ol>
+    <a id="bookmarklet" class="bookmark" href="#">RETRO SUB EXTRACT</a>
+    <button id="copyBm" class="btn" type="button">COPY BOOKMARKLET</button>
+    <div id="bmStatus" class="hint"></div>
+  </div>
+</div>
+
+<div id="videoPanel" class="panel hide">
+  <h2>[ VIDEO ]</h2>
+  <div class="video">
+    <img id="thumb" class="thumb" alt="">
+    <div><div id="title" class="title"></div><div id="meta" class="meta"></div></div>
+  </div>
+</div>
+
+<div id="trackPanel" class="panel hide">
+  <h2>[ CAPTION TRACKS ]</h2>
+  <div id="tracks" class="tracks"></div>
+</div>
+
+<div id="captionPanel" class="panel hide">
+  <h2>[ TRANSCRIPT ]</h2>
+  <div class="controls">
+    <select id="format" class="select"><option value="srt">SRT</option><option value="vtt">VTT</option><option value="txt">TXT</option></select>
+    <button id="copy" class="btn green">COPY TEXT</button>
+    <button id="download" class="btn">DOWNLOAD</button>
+    <input id="find" class="search" placeholder="Search transcript...">
+  </div>
+  <div id="viewer" class="viewer"></div>
+</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let state={video:null,tracks:[],selected:null,data:null,source:""};
+const appOrigin=location.origin;
+const status=(s,cls="")=>{$("#status").className="status "+cls;$("#status").textContent=s};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const fmtTime=x=>{x=Math.max(0,Number(x)||0);let h=Math.floor(x/3600),m=Math.floor(x%3600/60),s=Math.floor(x%60);return [h,m,s].map((v,i)=>i===0?String(v).padStart(2,"0"):String(v).padStart(2,"0")).join(":")};
+function showVideo(v){state.video=v||{};$("#videoPanel").classList.remove("hide");$("#title").textContent=v.title||"Untitled";$("#meta").textContent=[v.channel,v.duration?fmtTime(v.duration):""].filter(Boolean).join(" // ");if(v.thumbnail)$("#thumb").src=v.thumbnail}
+function renderTracks(){let el=$("#tracks");el.innerHTML="";state.tracks.forEach((t,i)=>{let b=document.createElement("button");b.className="track"+(state.selected===i?" active":"");b.innerHTML=`${esc(t.name||t.language||"unknown")} <small>[${esc(t.kind||"auto")}]</small>`;b.onclick=()=>loadCaption(i);el.appendChild(b)});$("#trackPanel").classList.remove("hide")}
+function renderData(data){state.data=data;state.source=data.source||"browser";showVideo(data.video||{});$("#captionPanel").classList.remove("hide");let v=$("#viewer");v.innerHTML="";(data.segments||[]).forEach((x,i)=>{let row=document.createElement("div");row.className="line";row.dataset.text=(x.text||"").toLowerCase();row.innerHTML=`<span class="time" data-t="${x.start}">[${fmtTime(x.start)}]</span><span class="caption">${esc(x.text)}</span>`;v.appendChild(row)});status(`CAPTION READY // ${data.language_name||data.language||"unknown"} // ${data.kind||""} // SOURCE: ${state.source.toUpperCase()}`,"ok");if(state.video?.id){}}
+function outputText(){let f=$("#format").value;return state.data?.outputs?.[f]||""}
+function download(){let f=$("#format").value,t=outputText();if(!t)return;let mime=f==="txt"?"text/plain;charset=utf-8":f==="vtt"?"text/vtt;charset=utf-8":"application/x-subrip;charset=utf-8";let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:mime}));a.download=`${(state.video?.title||"caption").replace(/[\\/:*?"<>|]/g,"_").slice(0,100)}.${f}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function scan(){let u=$("#url").value.trim();if(!u){status("ERR: masukkan URL YouTube.","err");return}status("SCANNING SERVER...");try{let r=await fetch("/api/info",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u})});let d=await r.json();if(!r.ok)throw Error(d.detail||"Scan gagal");state.tracks=d.tracks||[];state.selected=null;showVideo(d.video);renderTracks();status(`FOUND ${state.tracks.length} TRACK(S) // SERVER MODE`,"ok")}catch(e){status("SERVER EXTRACTION FAILED: "+e.message+"\\n\\nGunakan BROWSER ASSIST di atas. YouTube sedang menolak request dari server/datacenter.","err");$("#browserPanel").scrollIntoView({behavior:"smooth"})}}
+async function loadCaption(i){let t=state.tracks[i],u=$("#url").value.trim();state.selected=i;renderTracks();status("FETCHING CAPTION...");try{let r=await fetch("/api/caption",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u,language:t.language,kind:t.kind})});let d=await r.json();if(!r.ok)throw Error(d.detail||"Caption gagal");renderData(d)}catch(e){status("SERVER CAPTION FAILED: "+e.message+"\\nGunakan BROWSER ASSIST.","err")}}
+$("#scan").onclick=scan;
+$("#url").addEventListener("keydown",e=>{if(e.key==="Enter")scan()});
+$("#copy").onclick=async()=>{let t=outputText();if(!t)return;await navigator.clipboard.writeText(t);status("COPIED TO CLIPBOARD","ok")};
+$("#download").onclick=download;
+$("#find").oninput=e=>{let q=e.target.value.toLowerCase();document.querySelectorAll(".line").forEach(x=>x.style.display=!q||x.dataset.text.includes(q)?"grid":"none")};
+$("#viewer").onclick=e=>{let t=e.target.closest(".time")?.dataset.t;if(t&&state.video?.id)window.open("https://www.youtube.com/watch?v="+encodeURIComponent(state.video.id)+"&t="+Math.floor(Number(t))+"s","_blank")};
+
+async function setupBookmarklet(){
+  try{
+    let raw=await fetch("/api/bookmarklet").then(r=>r.text());
+    let code=raw.replace("__APP_ORIGIN__",appOrigin);
+    $("#bookmarklet").href="javascript:"+code;
+    $("#copyBm").onclick=async()=>{await navigator.clipboard.writeText("javascript:"+code);$("#bmStatus").textContent="Copied. Kamu juga bisa drag tombol RETRO SUB EXTRACT ke bookmark bar."};
+  }catch(e){$("#bmStatus").textContent="Bookmarklet gagal disiapkan: "+e.message}
+}
+window.addEventListener("message",e=>{if(e.origin!==appOrigin)return;let m=e.data||{};if(m.type==="RETRO_SUB_CAPTION"){let d=m.payload;$("#browserPanel").classList.add("hide");if(d.video)$("#url").value=d.video.url||$("#url").value;renderData(d)}});
+setupBookmarklet();
+
+if(new URLSearchParams(location.search).get("browserReceiver")==="1"){status("WAITING FOR BROWSER CAPTION...");$("#browserPanel").classList.remove("hide")}
+</script>
+</body>
+</html>

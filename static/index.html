@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RETRO SUB // YouTube Caption Terminal</title>
+<style>
+:root{
+  --bg:#080a08;--panel:#0d120d;--line:#29442b;--green:#73ff7a;--dim:#6c9b70;
+  --amber:#ffbd58;--red:#ff6666;--text:#c8f5cb;--shadow:0 0 18px rgba(115,255,122,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#050705;color:var(--text);font-family:"Courier New",monospace}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:10;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px);mix-blend-mode:screen}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:11;box-shadow:inset 0 0 100px rgba(0,0,0,.85)}
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.header{border:1px solid var(--line);background:var(--panel);padding:18px;box-shadow:var(--shadow)}
+.logo{font-size:clamp(24px,5vw,48px);font-weight:900;color:var(--green);text-shadow:0 0 10px rgba(115,255,122,.35);letter-spacing:3px}
+.sub{color:var(--dim);margin-top:7px}
+.prompt{color:var(--amber)}
+.card{margin-top:16px;border:1px solid var(--line);background:rgba(10,15,10,.94);padding:18px;box-shadow:var(--shadow)}
+label{display:block;color:var(--dim);margin-bottom:8px}
+input,select,button{font:inherit}
+input,select{width:100%;background:#050805;color:var(--green);border:1px solid #35633a;padding:13px;outline:none}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 12px rgba(115,255,122,.12)}
+button{border:1px solid #4f8f53;background:#0b170b;color:var(--green);padding:11px 15px;cursor:pointer;font-weight:700}
+button:hover{background:#102510;box-shadow:0 0 14px rgba(115,255,122,.13)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{border-color:var(--green);margin-top:12px;width:100%;padding:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.video{display:grid;grid-template-columns:180px 1fr;gap:16px}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);background:#030403}
+.title{font-size:20px;color:#e7ffe9;font-weight:bold}
+.meta{color:var(--dim);margin-top:8px}
+.tracks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.track{display:flex;gap:8px;align-items:center}
+.badge{font-size:11px;color:#071007;background:var(--green);padding:2px 5px}
+.badge.auto{background:var(--amber)}
+.toolbar{display:grid;grid-template-columns:1fr 160px 160px;gap:10px}
+.viewer{max-height:460px;overflow:auto;border:1px solid var(--line);margin-top:12px}
+.row{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:10px;border-bottom:1px dotted #1e331f}
+.row:hover{background:#0d180d}
+.time{color:var(--amber);cursor:pointer}
+.caption{color:#d7fbd9;line-height:1.5}
+.status{min-height:24px;margin-top:12px;color:var(--dim)}
+.ok{color:var(--green)}.err{color:var(--red)}.warn{color:var(--amber)}
+.hidden{display:none}
+.small{font-size:12px;color:var(--dim)}
+.footer{padding:20px 0;color:#48664b;text-align:center;font-size:12px}
+@media(max-width:700px){
+ .wrap{padding:10px}.grid,.video{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}
+ .row{grid-template-columns:65px 1fr}.logo{font-size:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header">
+    <div class="logo">RETRO SUB</div>
+    <div class="sub"><span class="prompt">&gt;</span> YOUTUBE // CAPTION EXTRACTION TERMINAL v2.2</div>
+  </header>
+
+  <section class="card">
+    <label for="url">ENTER YOUTUBE URL</label>
+    <input id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+    <button id="scan" class="primary">[ SCAN CAPTIONS ]</button>
+    <div id="status" class="status"></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="card">
+      <div class="video">
+        <img id="thumb" class="thumb" alt="">
+        <div>
+          <div id="title" class="title"></div>
+          <div id="meta" class="meta"></div>
+          <div id="tracks" class="tracks"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>LANGUAGE</label>
+          <select id="lang"></select>
+        </div>
+        <div>
+          <label>TYPE</label>
+          <select id="kind">
+            <option value="auto">AUTO-GENERATED</option>
+            <option value="manual">MANUAL</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:12px">
+        <select id="fmt">
+          <option value="srt">SRT</option>
+          <option value="vtt">VTT</option>
+          <option value="txt">TXT</option>
+        </select>
+        <button id="get">[ GET CAPTION ]</button>
+        <button id="copy">[ COPY TEXT ]</button>
+      </div>
+      <div id="downloadBox" class="hidden" style="margin-top:10px">
+        <button id="download">[ DOWNLOAD FILE ]</button>
+      </div>
+      <div class="small" style="margin-top:10px">Tip: click a timestamp to open the YouTube video at that position.</div>
+    </div>
+
+    <div class="card">
+      <label>CAPTION VIEWER</label>
+      <input id="search" placeholder="SEARCH IN CAPTIONS..." autocomplete="off">
+      <div id="viewer" class="viewer"></div>
+    </div>
+  </section>
+
+  <div class="footer">RETRO SUB // caption-only utility // use content responsibly</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let state = {url:"", video:null, captions:[], segments:[], text:"", filename:""};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function status(msg, cls=""){ $("#status").className="status "+cls; $("#status").textContent=msg; }
+function dur(sec){sec=Number(sec||0);let h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}h ${m}m ${s}s`:`${m}m ${s}s`;}
+function fmtTime(sec){sec=Math.max(0,Number(sec||0));let m=Math.floor(sec/60),s=Math.floor(sec%60);return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;}
+function youtubeTime(url, sec){
+ try{let u=new URL(url);u.searchParams.set("t",Math.floor(sec)+"s");return u.toString()}catch{return url}
+}
+function renderTracks(){
+ const box=$("#tracks");box.innerHTML="";
+ state.captions.forEach(c=>{
+   const b=document.createElement("button");b.className="track";
+   b.innerHTML=`${esc(c.lang)} <span class="badge ${c.kind==="auto"?"auto":""}">${c.kind==="auto"?"AUTO":"MANUAL"}</span>`;
+   b.onclick=()=>{ $("#lang").value=c.lang; $("#kind").value=c.kind; };
+   box.appendChild(b);
+ });
+}
+function renderViewer(){
+ const q=$("#search").value.trim().toLowerCase();
+ const rows=state.segments.filter(s=>!q||s.text.toLowerCase().includes(q));
+ $("#viewer").innerHTML=rows.map(s=>`<div class="row"><div class="time" data-t="${s.start}">${fmtTime(s.start)}</div><div class="caption">${esc(s.text)}</div></div>`).join("") || `<div class="row"><div class="caption">NO MATCHES.</div></div>`;
+ document.querySelectorAll(".time").forEach(x=>x.onclick=()=>window.open(youtubeTime(state.url,x.dataset.t),"_blank"));
+}
+async function post(path, body){
+ const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ const data=await r.json().catch(()=>({detail:"Invalid server response"}));
+ if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+ return data;
+}
+$("#scan").onclick=async()=>{
+ const url=$("#url").value.trim();
+ if(!url) return status("ERR: URL belum diisi.","err");
+ $("#scan").disabled=true; $("#result").classList.add("hidden"); status("SCANNING YOUTUBE CAPTION TRACKS...","warn");
+ try{
+   const d=await post("/api/info",{url});
+   state.url=url;state.video=d.video;state.captions=d.captions||[];
+   $("#thumb").src=d.video.thumbnail||"";
+   $("#title").textContent=d.video.title;
+   $("#meta").textContent=`${d.video.channel||"Unknown channel"} // ${dur(d.video.duration)}`;
+   const langs=[...new Set(state.captions.map(c=>c.lang))];
+   $("#lang").innerHTML=langs.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+   if(state.captions.length){$("#kind").value=state.captions[0].kind}
+   renderTracks();$("#result").classList.remove("hidden");
+   status(`OK: ${state.captions.length} CAPTION TRACK(S) FOUND.`,"ok");
+ }catch(e){status("ERR: "+e.message,"err")}
+ finally{$("#scan").disabled=false}
+};
+$("#get").onclick=async()=>{
+ if(!state.url||!$("#lang").value) return status("ERR: pilih bahasa.","err");
+ $("#get").disabled=true;status("EXTRACTING CAPTION...","warn");
+ try{
+   const d=await post("/api/caption",{url:state.url,lang:$("#lang").value,kind:$("#kind").value,fmt:$("#fmt").value});
+   state.segments=d.segments;state.text=d.text;state.filename=d.filename;
+   renderViewer();$("#downloadBox").classList.remove("hidden");
+   status(`OK: ${d.count} CUES // ${d.filename}`,"ok");
+ }catch(e){status("ERR: "+e.message,"err")}
+ finally{$("#get").disabled=false}
+};
+$("#copy").onclick=async()=>{
+ if(!state.text) return status("ERR: belum ada caption. Klik GET CAPTION dulu.","err");
+ try{await navigator.clipboard.writeText(state.text);status("COPIED TO CLIPBOARD.","ok")}
+ catch{status("ERR: clipboard access denied.","err")}
+};
+$("#download").onclick=()=>{
+ const blob=new Blob([state.text],{type:$("#fmt").value==="srt"?"application/x-subrip":$("#fmt").value==="vtt"?"text/vtt":"text/plain"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=state.filename||"retro-sub.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("#search").oninput=renderViewer;
+$("#url").addEventListener("keydown",e=>{if(e.key==="Enter")$("#scan").click()});
+</script>
+</body>
+</html>
